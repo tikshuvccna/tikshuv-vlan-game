@@ -15,9 +15,9 @@
     ],
     stage: { bg: 0x0a1020 },
     levels: {
-      easy: { rounds: [{ n: 6, g: [10, 20] }, { n: 6, g: [10, 20, 30] }, { n: 8, g: [10, 20, 30] }], time: 100, ring: true, two: false, lives: 0, stars: [400, 800, 1200] },
-      mid: { rounds: [{ n: 8, g: [10, 20, 30] }, { n: 9, g: [10, 20, 30, 99] }, { n: 10, g: [10, 20, 30, 99] }], time: 65, ring: false, two: false, lives: 3, stars: [1000, 2200, 3300] },
-      hard: { rounds: [{ n: 10, g: [10, 20, 30] }, { n: 12, g: [10, 20, 30, 99] }, { n: 14, g: [10, 20, 30, 99] }], time: 60, ring: false, two: true, lives: 3, stars: [2400, 5000, 7600] },
+      easy: { rounds: [{ n: 6, g: [10, 20] }, { n: 6, g: [10, 20, 30] }, { n: 8, g: [10, 20, 30] }], time: 100, ring: true, two: false, lives: 0, stars: [700, 1200, 1700] },
+      mid: { rounds: [{ n: 8, g: [10, 20, 30] }, { n: 9, g: [10, 20, 30, 99] }, { n: 10, g: [10, 20, 30, 99] }], time: 65, ring: false, two: false, lives: 3, stars: [1500, 2400, 3300] },
+      hard: { rounds: [{ n: 10, g: [10, 20, 30] }, { n: 12, g: [10, 20, 30, 99] }, { n: 14, g: [10, 20, 30, 99] }], time: 60, ring: false, two: true, lives: 3, stars: [2200, 3400, 4800] },
     },
     create(G) {
       const st = G.stage, cfg = G.cfg;
@@ -108,6 +108,7 @@
           if (tLeft <= 0 && !roundDone && cfg.lives) { roundDone = true; G.miss(0); G.msg('⏰ נגמר הזמן לסיבוב', '#f87171'); if (G.loseLife() > 0) { if (roundIdx + 1 >= cfg.rounds.length) finish(); else { roundIdx++; build(roundIdx); } } }
         },
       };
+      G.dbg = { get hosts() { return hosts; }, paint, check, setPalette: (v) => { palette = v; }, get roundIdx() { return roundIdx; }, toggleTrunk, get net() { return net; } };
       roundIdx = 0; build(0);
       return G.ctl;
     },

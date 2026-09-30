@@ -145,6 +145,7 @@
           });
         }
       }
+      G.dbg = { pcs, racks, selectPc, clickRack, get reqs() { return reqs; } };
       G.ctl = {
         start() { renderBar(); G.setMid('בקשות', `0/${cfg.requests}`); },
         update(dt) {

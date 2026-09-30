@@ -29,7 +29,7 @@
 | 7 | ⚖️ יתרונות וחסרונות | מאזניים, VLAN Hopping (Double Tagging), הקשחה | **רץ ה-VLAN** – ריצה בשלושה נתיבים: יתרון / חיסרון / מיתוס |
 | 8 | ⌨️ הגדרה ב-Cisco | CLI חי: vlan, name, access, range, trunk, native, allowed, router-on-a-stick, SVI, שמירה | **מפקד הקונפיגורציה** – סימולטור IOS אמיתי עם משימות |
 | 9 | 🔍 בדיקה ואימות | show vlan brief / interfaces trunk / switchport / ip int brief / mac address-table, ping, ipconfig, שיטת פתרון תקלות | **הבלש של הרשת** – 9 תיקי תקלות לחקור ולתקן |
-| 🏁 | 👾 מבחן סיום | 15 שאלות אקראיות מתוך מאגר של 44 | קרב מול מפלצת ה-Broadcast ← **תעודה** |
+| 🏁 | 👾 מבחן סיום | 15 שאלות אקראיות מתוך מאגר של 42 | קרב מול מפלצת ה-Broadcast ← **תעודה** |
 
 ### 🎚️ רמות (מתאים גם למי שלא גיימר)
 
