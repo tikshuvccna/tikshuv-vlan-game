@@ -3,6 +3,7 @@
   const M = VQ.M, V3 = M.V3, h = VQ.h;
   VQ.game({
     id: 'tags', chapter: 'trunk', title: 'מיון תגיות',
+    concept: 'תיוג 802.1Q: התג הוא ה-VLAN של פורט ה-Access • Native יוצא בלי תג • VLAN שלא ב-Allowed נחסם',
     tagline: 'פריימים נכנסים מפורטי Access אל ה-Trunk. אתם המתג: בחרו את התג הנכון לכל פריים לפני שהתור מתמלא!',
     howto: [
       'הפריים הראשון בתור מסומן. **התג = ה-VLAN של הפורט ממנו הגיע.** לחצו על הכפתור המתאים (או מקש 1–5).',
@@ -45,7 +46,7 @@
       const zoneRing = new THREE.Mesh(new THREE.RingGeometry(0.9, 1.2, 32), new THREE.MeshBasicMaterial({ color: 0xfde047, transparent: true, opacity: 0.6, side: THREE.DoubleSide })); zoneRing.rotation.x = -Math.PI / 2; zoneRing.position.set(-2.4, 0.05, 0); st.add(zoneRing);
 
       let rule = { native: 1, allowed: null }, queue = [], spawned = 0, spawnT = 1, activeT = 0, decided = 0, ruleT = 12;
-      const stats = { ok: 0, wrong: 0, timeouts: 0 };
+      const stats = { ok: 0, wrong: 0, timeouts: 0 }; const rev = new Map();
       const ruleBox = h('div', { style: { fontFamily: 'var(--mono)', direction: 'ltr', textAlign: 'left', fontSize: '13px', lineHeight: 1.5, color: '#7ee7fb' } });
       const timerBar = h('div', { style: { height: '6px', borderRadius: '6px', background: '#22d3ee', width: '100%', marginTop: '4px', transformOrigin: 'left' } });
       G.ui.task.append(h('div', { class: 'box' }, ruleBox, timerBar));
@@ -85,13 +86,13 @@
             st.tween(f.pk.position, { x: 5.6, y: 0.6, z: 0 }, 0.6, { ease: 'lin' }).then(() => { f.pk.setTag(null); return st.tween(f.pk.position, { x: d.pos.x - 0.6, z: d.pos.z, y: 0.6 }, 0.45, { ease: 'lin' }); }).then(() => { VQ.fx.burst(st, d.pos.clone().add(V3(0, 0.6, 0)), VQ.vhex(f.v), 12, 2.5); st.remove(f.pk); });
           }
         } else {
-          stats.wrong++; G.miss(cfg.lives ? 0 : 10, f.pk.position.clone().add(V3(0, 1.5, 0)));
+          stats.wrong++; rev.set(want + ':' + f.v, [`פריים מ-VLAN ${f.v}: ${want === 'drop' ? 'Drop' : want === 'none' ? 'ללא תג' : 'Tag ' + want}`, want === 'drop' ? 'VLAN שלא ב-Allowed של ה-Trunk נחסם.' : want === 'none' ? 'ה-Native VLAN יוצא ב-Trunk בלי תג.' : 'התג = ה-VLAN של פורט ה-Access שממנו הגיע הפריים.']); G.miss(cfg.lives ? 0 : 10, f.pk.position.clone().add(V3(0, 1.5, 0)));
           VQ.fx.burst(st, f.pk.position.clone(), 0xf87171, 20, 4); VQ.fx.float(st, f.pk.position.clone().add(V3(0, 2, 0)), want === 'drop' ? 'צריך Drop!' : want === 'none' ? 'צריך ללא תג!' : 'צריך Tag ' + want, '#fca5a5', 0.5);
           st.remove(f.pk); if (cfg.lives) G.loseLife();
         }
         checkEnd();
       }
-      function checkEnd() { if (spawned >= cfg.frames && !queue.length && !G.ended) { const perfect = stats.wrong === 0 && stats.timeouts === 0; G.end({ completed: true, perfect, bonus: perfect ? 300 : 0, title: perfect ? 'תיוג מושלם! 🏷️' : 'התור התרוקן', stats: [['תויגו נכון', stats.ok], ['טעויות', stats.wrong], ['פספוסים (זמן)', stats.timeouts]], note: 'זכרו: התג = ה-VLAN של פורט ה-Access. ה-Native יוצא בלי תג, ומה שלא ב-Allowed לא עובר.' }); } }
+      function checkEnd() { if (spawned >= cfg.frames && !queue.length && !G.ended) { const perfect = stats.wrong === 0 && stats.timeouts === 0; G.end({ completed: true, perfect, bonus: perfect ? 300 : 0, title: perfect ? 'תיוג מושלם! 🏷️' : 'התור התרוקן', stats: [['תויגו נכון', stats.ok], ['טעויות', stats.wrong], ['פספוסים (זמן)', stats.timeouts]], note: 'זכרו: התג = ה-VLAN של פורט ה-Access. ה-Native יוצא בלי תג, ומה שלא ב-Allowed לא עובר.', review: [...rev.values()] }); } }
       G.ctl = {
         onKey(e) { const m = e.code.match(/^(Digit|Numpad)(\d)$/); if (m) { const a = actions[+m[2] - 1]; if (a) decide(a.id); } },
         start() { G.setMid('פריימים', `0/${cfg.frames}`); },

@@ -53,6 +53,7 @@
 
   VQ.game({
     id: 'maze', chapter: 'intervlan', title: 'מבוך החבילה',
+    concept: 'VLAN-ים מבודדים: רק נתב/מתג L3 מעביר ביניהם ומחליף תג (Default Gateway, Router-on-a-Stick)',
     tagline: 'חבילה מ-VLAN אחד צריכה להגיע ל-VLAN אחר. רק הנתב יכול להחליף לה את התג — מצאו אותו!',
     howto: [
       'הזיזו את החבילה עם **החיצים / WASD**, החלקה על המסך, או כפתורי החצים.',
@@ -69,14 +70,14 @@
       const st = G.stage, cfg = G.cfg;
       M.stars(st, 250, 80);
       let mapIdx = -1, map, world, pos, tag, leg, moving = false, blobs = [], tLeft = 0, startT = 0, stats = { maps: 0, hits: 0, bumps: 0 };
-      let pk, ptr = null;
+      let pk, ptr = null, usedTrunk = false;
       const px = (x) => (x - (map.w - 1) / 2) * T, pz = (y) => (y - (map.hgt - 1) / 2) * T;
       const dpad = h('div', { style: { direction: 'ltr', display: 'grid', gridTemplateColumns: 'repeat(3,56px)', gridTemplateRows: 'repeat(2,56px)', gap: '6px' } });
       [['', ''], ['▲', 'up'], ['', ''], ['◀', 'left'], ['▼', 'down'], ['▶', 'right']].forEach(([t, d]) => dpad.append(t ? h('button', { class: 'bigbtn', style: { minWidth: 0, padding: 0, background: '#38bdf8', fontSize: '22px' }, onPointerDown: (e) => { e.preventDefault(); step(d); } }, t) : h('span')));
       G.ui.bottom.append(dpad);
       function build(i) {
         if (world) st.remove(world);
-        map = cfg.maps[i]; world = new THREE.Group(); st.add(world); blobs = []; leg = 1; moving = false; tLeft = map.time || 0; startT = G.time;
+        map = cfg.maps[i]; world = new THREE.Group(); st.add(world); blobs = []; usedTrunk = false; leg = 1; moving = false; tLeft = map.time || 0; startT = G.time;
         let S, D;
         map.rows.forEach((row, y) => [...row].forEach((ch, x) => {
           const X = px(x), Z = pz(y);
@@ -117,15 +118,16 @@
         moving = false;
         const ch = map.rows[ny][nx];
         if (r.router && tag !== r.tag) { tag = r.tag; pk.setColor(VQ.vhex(tag)); VQ.fx.ring(st, V3(px(nx), 0.2, pz(ny)), 0xfde047, 2, 0.6); VQ.fx.float(st, V3(px(nx), 2.4, pz(ny)), `🧭 תג חדש: VLAN ${tag}`, '#fde047', 0.5); VQ.sfx.play('level'); say(`הנתב החליף את התג ל-VLAN ${tag}! עכשיו הדלת של VLAN ${tag} נפתחת.`); G.addScore(40); }
-        const onTrunk = ch === ':' || ch === 'R';
+        const onTrunk = ch === ':' || ch === 'R'; if (ch === ':') usedTrunk = true;
         pk.setTag(onTrunk ? VQ.vhex(tag) : null); if (!onTrunk) pk.setColor(VQ.vhex(tag));
         if (ch === 'D' && leg === 1) { if (map.legs > 1) { leg = 2; G.hit(150, V3(px(nx), 2, pz(ny))); VQ.sfx.play('coin'); VQ.fx.burst(st, V3(px(nx), 1, pz(ny)), 0x86efac, 20, 3); say('✔ הבקשה הגיעה! עכשיו החזירו את ה-Reply בחזרה לשולח 🔁'); } else finishMap(); }
         else if (ch === 'S' && leg === 2) finishMap();
       }
       function finishMap() {
+        say(`✔ המסלול: 💻 VLAN ${map.sV}${usedTrunk ? ' ← Trunk (מתויג ' + map.sV + ')' : ''} ← 🧭 נתב מחליף תג ל-${map.dV}${usedTrunk ? ' ← Trunk (מתויג ' + map.dV + ')' : ''} ← 🗄️ VLAN ${map.dV}`);
         stats.maps++; const t = G.time - startT; const bonus = Math.max(0, Math.round((map.time ? tLeft : 40 - t) * 4));
         G.hit(300 + bonus, V3(px(pos[0]), 2.5, pz(pos[1]))); VQ.sfx.play('fanfare'); VQ.fx.confetti(st, V3(px(pos[0]), 2, pz(pos[1])), 30); moving = true;
-        st.wait(1.3).then(() => { moving = false; if (mapIdx + 1 >= cfg.maps.length) G.end({ completed: true, perfect: stats.hits === 0, bonus: stats.hits === 0 ? 200 : 0, title: 'החבילה הגיעה!', stats: [['מפות שהושלמו', stats.maps], ['פגיעות מסערות', stats.hits], ['חבטות בדלתות', stats.bumps]], note: 'ראיתם? החבילה לא יכלה לעבור בין VLAN-ים בלי נתב. בדיוק כמו ברשת אמיתית.' }); else { mapIdx++; build(mapIdx); } });
+        st.wait(2.6).then(() => { moving = false; if (mapIdx + 1 >= cfg.maps.length) G.end({ completed: true, perfect: stats.hits === 0, bonus: stats.hits === 0 ? 200 : 0, title: 'החבילה הגיעה!', stats: [['מפות שהושלמו', stats.maps], ['פגיעות מסערות', stats.hits], ['חבטות בדלתות', stats.bumps]], note: 'ראיתם? החבילה לא יכלה לעבור בין VLAN-ים בלי נתב. בדיוק כמו ברשת אמיתית.' }); else { mapIdx++; build(mapIdx); } });
       }
       st.onPointerDown = (e) => { ptr = { x: e.clientX, y: e.clientY }; };
       st.onPointerUp = (e) => { if (!ptr) return; const dx = e.clientX - ptr.x, dy = e.clientY - ptr.y; ptr = null; if (Math.hypot(dx, dy) > 28) step(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up'); };

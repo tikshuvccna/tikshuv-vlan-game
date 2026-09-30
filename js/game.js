@@ -87,7 +87,12 @@
       const sc = h('div', { class: 'bigscore' }, '0'); box.append(sc);
       if (rec.record) box.append(h('span', { class: 'badge-new' }, '🏆 שיא חדש!'));
       if (completed && !rec.record) box.append(h('div', { class: 'sub' }, `השיא שלכם: ${VQ.fmt(VQ.store.game(chId, lvId).best)}`));
+      if (def.concept) box.append(h('div', { class: 'sub', style: { background: 'rgba(34,211,238,.08)', border: '1px solid rgba(34,211,238,.25)', borderRadius: '12px', padding: '8px 12px', margin: '8px 0', textAlign: 'right' } }, '🎯 מה חיזקנו כאן: ', h('b', {}, def.concept)));
       if (r.note) box.append(h('p', {}, r.note));
+      if (r.review && r.review.length) {
+        box.append(h('h3', { style: { margin: '10px 0 4px' } }, '📌 כדאי לחזור על'));
+        r.review.slice(0, 4).forEach((x) => box.append(h('div', { class: 'rrow', style: { textAlign: 'right', gap: '10px' } }, h('span', {}, x[0]), h('span', { class: 'sub', style: { maxWidth: '60%' } }, x[1]))));
+      }
       const stats = (r.stats || []).concat(G.bestCombo >= 3 ? [['רצף הצלחות מקסימלי', G.bestCombo]] : []);
       stats.forEach(([a, b]) => box.append(h('div', { class: 'rrow' }, h('span', {}, a), h('b', {}, String(b)))));
       if (completed) box.append(h('div', { class: 'rrow' }, h('span', {}, `כפולת רמה (${lv.name})`), h('b', {}, 'x' + lv.mult)));
@@ -97,6 +102,7 @@
         completed && nextLv ? h('button', { class: 'btn amber', onClick: () => VQ.startGame(chId, nextLv.id) }, `${nextLv.medal} לרמת "${nextLv.name}"`) : null,
         completed ? h('button', { class: 'btn ghost', onClick: () => ui.copy(ui.shareText(def.title, G.score)) }, '📣 אתגרו חבר') : null,
         !completed && lvId !== 'easy' ? h('button', { class: 'btn amber', onClick: () => VQ.startGame(chId, lvId === 'hard' ? 'mid' : 'easy') }, 'לרמה קלה יותר') : null,
+        h('button', { class: !completed || stars < 2 ? 'btn amber' : 'btn ghost', onClick: () => VQ.runLesson(chId) }, '📘 חזרה על השיעור'),
         h('button', { class: 'btn ghost', onClick: () => VQ.goHub(chId) }, '🗺️ למפה'));
       box.append(btns);
       setTimeout(() => { ui.modal(box); ui.countUp(sc, G.score); }, completed ? 900 : 500);
@@ -128,6 +134,7 @@
     const intro = h('div', {},
       h('div', { class: 'sub' }, `${ch.icon} תחנה ${ch.n} • ${lv.medal} רמה: ${lv.name} (x${lv.mult})`),
       h('h2', {}, '🎮 ' + def.title), h('p', {}, def.tagline || ''),
+      def.concept ? h('p', { class: 'sub' }, '🎯 מה מתרגלים: ' + def.concept) : null,
       h('h3', {}, 'איך משחקים'),
       h('ul', { class: 'learn' }, def.howto.map((t) => h('li', { html: VQ.rich(t) }))),
       cfg.note ? h('p', { class: 'sub', html: VQ.rich(cfg.note) }) : null,

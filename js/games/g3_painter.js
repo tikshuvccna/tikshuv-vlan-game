@@ -6,6 +6,7 @@
   const DEPT = { 10: 'מכירות', 20: 'כספים', 30: 'אורחים', 99: 'ניהול' };
   VQ.game({
     id: 'painter', chapter: 'what', title: 'צבע את הרשת',
+    concept: 'שיוך פורטים ל-VLAN לפי מחלקה, בידוד Broadcast וחיבור בין מתגים ב-Trunk',
     tagline: 'חלקו את הרשת ל-VLAN-ים! שייכו כל מחשב ל-VLAN של המחלקה שלו — ובדקו שה-Broadcast לא בורח.',
     howto: [
       '**בחרו צבע VLAN** בתחתית המסך, ואז **לחצו על מחשבים** כדי לשייך את הפורט שלהם ל-VLAN הזה (בדיוק כמו `switchport access vlan`).',
@@ -98,7 +99,7 @@
       }
       function finish() {
         const perfect = sums.fails === 0;
-        G.end({ completed: true, perfect, bonus: perfect ? 200 : 0, title: perfect ? 'צבעתם בלי טעות! 🎨' : 'הרשת חולקה!', stats: [['סיבובים', sums.rounds], ['בדיקות', sums.checks], ['בדיקות שנכשלו', sums.fails]], note: 'כל מחלקה קיבלה Broadcast Domain משלה — בדיוק מה ש-VLAN עושה.' });
+        G.end({ completed: true, perfect, bonus: perfect ? 200 : 0, title: perfect ? 'צבעתם בלי טעות! 🎨' : 'הרשת חולקה!', stats: [['סיבובים', sums.rounds], ['Broadcast Domains (VLAN-ים) בסיבוב האחרון', cfg.rounds[cfg.rounds.length - 1].g.length], ['בדיקות', sums.checks], ['בדיקות שנכשלו', sums.fails]], note: 'כל מחלקה קיבלה Broadcast Domain משלה — בדיוק מה ש-VLAN עושה.' });
       }
       G.ctl = {
         intro() { roundIdx = 0; build(0); },

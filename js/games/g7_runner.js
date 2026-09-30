@@ -11,6 +11,7 @@
     ['m', 'Access Port נושא הרבה VLAN-ים עם תג', 2], ['m', 'מספר ה-VLAN-ים המקסימלי הוא 256', 3], ['m', 'לכל VLAN חייב להיות כבל פיזי משלו', 2], ['m', 'ה-Native VLAN הוא תמיד VLAN 10', 3],
     ['m', 'Hub תומך ב-VLAN', 2], ['m', 'אפשר למחוק את VLAN 1', 3], ['m', 'ב-Trunk התעבורה עוברת בלי שום תג', 3], ['m', 'כדי להעביר משתמש ל-VLAN אחר חייבים להחליף כבל', 2],
   ];
+  const WHY = {"מצמצם את ה-Broadcast Domain": "כל VLAN הוא Broadcast Domain נפרד, ולכן Broadcast מגיע רק לחלק מהמחשבים.", "מאפשר הפרדה בין מחלקות על אותו מתג": "מתג אחד מחזיק כמה VLAN-ים מבודדים – בלי מתג פיזי לכל מחלקה.", "מעבירים משתמש למחלקה אחרת בלי להחליף כבל": "משנים רק את ה-VLAN של הפורט (switchport access vlan).", "חוסך רכישת מתג נפרד לכל מחלקה": "מתג מנוהל אחד מחליף כמה מתגים פיזיים.", "מאפשר לתעדף תעבורת קול (Voice VLAN)": "Voice VLAN מפריד את הטלפוניה מהנתונים וגם מאפשר QoS.", "מקל על ארגון הרשת לפי תפקידים": "מארגנים לפי מחלקה/תפקיד ולא לפי מיקום פיזי.", "פחות Broadcast = ביצועים טובים יותר": "כל מחשב מעבד פחות הודעות שלא קשורות אליו.", "מגביל נזק של מחשב פרוץ לקבוצה אחת": "מחשב פרוץ רואה רק את ה-VLAN שלו (וניתוב מבוקר החוצה).", "דורש נתב או מתג L3 כדי לתקשר בין VLAN-ים": "VLAN-ים שונים הם Subnets שונים – בלי שכבה 3 אין תקשורת ביניהם. זו עלות תכנון.", "טעות בהגדרת Trunk עלולה לנתק קומה שלמה": "Trunk נושא הרבה VLAN-ים; שגיאה בו פוגעת בכולם (Allowed, Native, mode).", "דורש תכנון ותיעוד מסודרים": "מספרים, שמות ותת־רשתות חייבים להיות מתועדים כדי לא להתבלבל.", "בלי הקשחה חשוף להתקפת VLAN Hopping": "Double Tagging / Switch Spoofing מנצלים Native VLAN ופורטים לא מוקשחים.", "איתור תקלות מורכב יותר": "צריך לבדוק פורט, VLAN, Trunk, Native ו-Gateway – יותר שכבות לבדיקה.", "ציוד מנוהל יקר יותר ממתג לא מנוהל": "מתג לא מנוהל לא תומך VLAN; מתג מנוהל עולה יותר.", "אי־התאמה ב-Native VLAN גורמת לבעיות": "הצדדים חייבים להסכים אילו פריימים יוצאים בלי תג.", "בלי ACL/חומת אש אין הפרדה מלאה של מדיניות": "VLAN מפריד, אבל ההחלטה מי מדבר עם מי נאכפת ב-ACL/Firewall.", "VLAN מחליף חומת אש לחלוטין": "VLAN מפריד רשתות אבל לא מסנן תעבורה – חומת אש עדיין נחוצה.", "מחשבים ב-VLAN-ים שונים מדברים ישירות בלי נתב": "VLAN-ים שונים הם Subnets שונים; רק התקן שכבה 3 מעביר ביניהם.", "VLAN מגדיל את ה-Broadcast Domain": "להפך – VLAN מחלק אותו לחלקים קטנים.", "אפשר להגדיר VLAN במתג לא מנוהל": "מתג לא מנוהל אין בו CLI ואי אפשר להגדיר בו VLAN-ים.", "Access Port נושא הרבה VLAN-ים עם תג": "Access = VLAN אחד בלי תג. הרבה VLAN-ים עם תג זה Trunk.", "מספר ה-VLAN-ים המקסימלי הוא 256": "שדה VLAN ID הוא 12 ביט = עד 4094 VLAN-ים.", "לכל VLAN חייב להיות כבל פיזי משלו": "Trunk נושא הרבה VLAN-ים בכבל אחד (עם תגי 802.1Q).", "ה-Native VLAN הוא תמיד VLAN 10": "ברירת המחדל היא VLAN 1, וממליצים להחליף ל-VLAN שלא בשימוש.", "Hub תומך ב-VLAN": "Hub הוא שכבה 1 – אין לו מושג של פריימים או VLAN.", "אפשר למחוק את VLAN 1": "VLAN 1 הוא ברירת המחדל ואי אפשר למחוק אותו.", "ב-Trunk התעבורה עוברת בלי שום תג": "ב-Trunk פריימים מתויגים ב-802.1Q (מלבד ה-Native VLAN).", "כדי להעביר משתמש ל-VLAN אחר חייבים להחליף כבל": "לא – משנים את ה-VLAN של הפורט בהגדרה."};
   const LANES = [{ t: 'p', label: '✅ יתרון', color: 0x4ade80, css: '#4ade80', x: -3.2 }, { t: 'c', label: '⚠️ חיסרון', color: 0xfb923c, css: '#fb923c', x: 0 }, { t: 'm', label: '❌ מיתוס', color: 0xf87171, css: '#f87171', x: 3.2 }];
   VQ.game({
     id: 'runner', chapter: 'proscons', title: 'רץ ה-VLAN',
@@ -20,6 +21,7 @@
       'הטענה מופיעה למעלה. רוצו דרך השער הנכון. אספו 🪙 בדרך לבונוס.',
       'ברמה הקשה יש גם מכשולי Broadcast אדומים – התחמקו מהם!',
     ],
+    concept: 'יתרונות וחסרונות של VLAN, ההבדל בין יתרון, חיסרון ומיתוס נפוץ',
     stage: { bg: 0x090e1d, fogNear: 30, fogFar: 90 },
     levels: {
       easy: { n: 10, tier: 1, speed: 8, gap: 52, lives: 0, obstacles: false, stars: [350, 700, 1000] },
@@ -39,7 +41,8 @@
       const stats = { ok: 0, wrong: 0, coins: 0, hits: 0 };
       const picks = (() => { const pool = S.filter((s) => s[2] <= cfg.tier); const by = { p: [], c: [], m: [] }; VQ.shuffle(pool).forEach((s) => by[s[0]].push(s)); const out = []; let k = 0; const keys = ['p', 'c', 'm']; while (out.length < cfg.n) { const t = keys[k++ % 3]; const s = by[t].pop() || by[keys[(k) % 3]].pop() || by[keys[(k + 1) % 3]].pop(); if (!s) break; out.push(s); } return VQ.shuffle(out); })();
       const stmt = h('div', { class: 'box', style: { fontSize: '19px', fontWeight: 800, minWidth: 'min(520px,92vw)' } }, 'מוכנים?');
-      G.ui.task.append(stmt); G.ui.task.style.top = '64px';
+      const fb = h('div', { class: 'box', style: { fontSize: '14px', marginTop: '6px', maxWidth: 'min(560px,92vw)', display: 'none' } });
+      G.ui.task.style.flexDirection = 'column'; G.ui.task.style.alignItems = 'center'; G.ui.task.append(stmt, fb); G.ui.task.style.top = '64px';
       const btns = h('div', { class: 'row', style: { justifyContent: 'space-between', width: '100%', direction: 'ltr' } }, h('button', { class: 'bigbtn', style: { background: '#38bdf8' }, onPointerDown: (e) => { e.preventDefault(); move(-1); } }, '◀'), h('button', { class: 'bigbtn', style: { background: '#38bdf8' }, onPointerDown: (e) => { e.preventDefault(); move(1); } }, '▶'));
       G.ui.bottom.append(btns);
       function move(d) { if (!G.running) return; const nl = VQ.clamp(lane + d, 0, 2); if (nl !== lane) { lane = nl; targetX = LANES[lane].x; VQ.sfx.play('whoosh'); } }
@@ -62,14 +65,14 @@
       function showNext() { const g = gates.find((x) => !x.done); if (g) stmt.innerHTML = VQ.esc(g.s[1]); }
       function judge(gt) {
         gt.done = true; const l = LANES[lane], good = l.t === gt.s[0]; asked++;
-        if (good) { stats.ok++; G.hit(100, V3(l.x, 4, -2)); VQ.sfx.play('ok'); VQ.fx.burst(st, V3(l.x, 2, -1), l.color, 24, 4); G.msg('✔ ' + l.label, l.css); }
-        else { stats.wrong++; missed.push(gt.s); G.miss(cfg.lives ? 0 : 20, V3(l.x, 4, -2)); const right = LANES.find((x) => x.t === gt.s[0]); G.msg('✖ זה היה ' + right.label, '#f87171'); VQ.fx.ring(st, V3(right.x, 0.1, -1), right.color, 3, 0.8); if (cfg.lives) G.loseLife(); }
+        if (good) { stats.ok++; fb.style.display = ''; fb.innerHTML = '✔ ' + VQ.esc(WHY[gt.s[1]] || ''); G.hit(100, V3(l.x, 4, -2)); VQ.sfx.play('ok'); VQ.fx.burst(st, V3(l.x, 2, -1), l.color, 24, 4); G.msg('✔ ' + l.label, l.css); }
+        else { stats.wrong++; missed.push(gt.s); G.miss(cfg.lives ? 0 : 20, V3(l.x, 4, -2)); const right = LANES.find((x) => x.t === gt.s[0]); G.msg('✖ זה היה ' + right.label, '#f87171'); fb.style.display = ''; fb.innerHTML = '❌ <b>' + VQ.esc(gt.s[1]) + '</b> — ' + right.label + '. ' + VQ.esc(WHY[gt.s[1]] || ''); VQ.fx.ring(st, V3(right.x, 0.1, -1), right.color, 3, 0.8); if (cfg.lives) G.loseLife(); }
         showNext();
         // spawn next gate ahead
         const nextI = gt.i + 2; if (nextI < picks.length) { const z = gates[gates.length - 1].z - cfg.gap; gates.push(mkGate(nextI, z)); spawnCoins(z + cfg.gap - 6, z + 8); spawnObst(z + cfg.gap - 12, z + 10); }
         if (asked >= picks.length) setTimeout(() => G.ended || finish(), 900);
       }
-      function finish() { const perfect = stats.wrong === 0 && stats.hits === 0; G.end({ completed: true, perfect, bonus: perfect ? 300 : 0, title: perfect ? 'ריצה מושלמת! 🏅' : 'סיימתם את המסלול', stats: [['תשובות נכונות', `${stats.ok}/${picks.length}`], ['מטבעות', stats.coins], ['התנגשויות', stats.hits]], note: missed.length ? 'לחזרה: ' + missed.slice(0, 3).map((m) => `"${m[1]}" (${m[0] === 'p' ? 'יתרון' : m[0] === 'c' ? 'חיסרון' : 'מיתוס'})`).join(' • ') : 'הבנה מעולה של יתרונות וחסרונות!' }); }
+      function finish() { const perfect = stats.wrong === 0 && stats.hits === 0; G.end({ completed: true, perfect, bonus: perfect ? 300 : 0, title: perfect ? 'ריצה מושלמת! 🏅' : 'סיימתם את המסלול', stats: [['תשובות נכונות', `${stats.ok}/${picks.length}`], ['מטבעות', stats.coins], ['התנגשויות', stats.hits]], review: missed.map((m) => [`"${m[1]}" — ${m[0] === 'p' ? 'יתרון' : m[0] === 'c' ? 'חיסרון' : 'מיתוס'}`, WHY[m[1]] || '']), note: missed.length ? '' : 'הבנה מעולה של יתרונות וחסרונות!' }); }
       G.ctl = {
         onKey(e) { if (['ArrowLeft', 'KeyA'].includes(e.code)) { e.preventDefault(); move(-1); } else if (['ArrowRight', 'KeyD'].includes(e.code)) { e.preventDefault(); move(1); } },
         start() { showNext(); G.setMid('שערים', `0/${picks.length}`); },

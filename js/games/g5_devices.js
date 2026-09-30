@@ -26,6 +26,7 @@
   ];
   VQ.game({
     id: 'sorter', chapter: 'devices', title: 'מיון מכשירים',
+    concept: 'אילו התקנים מבינים VLAN, אילו רק חברים בו ואילו לא תומכים בו',
     tagline: 'סרט נע מביא מכשירי רשת. שלחו כל מכשיר לפח הנכון — מי מבין VLAN, מי סתם חבר, ומי לא יכול בכלל.',
     howto: [
       'המכשיר הקרוב ביותר לפחים הוא זה שעליו מחליטים. **לחצו על הפח** (או ← ↓ →  /  1 2 3).',
@@ -59,7 +60,7 @@
       });
       const pool = DEV.filter((d) => d.lv <= cfg.tier);
       let list = [], spawned = 0, spawnT = 1, seq = [];
-      const stats = { ok: 0, wrong: 0, missed: 0 }; const mistakes = new Set();
+      const stats = { ok: 0, wrong: 0, missed: 0 }; const mistakes = new Set(); const rev = new Map();
       function nextDev() { if (!seq.length) seq = VQ.shuffle(pool); return seq.pop(); }
       function spawn() {
         const d = nextDev(); spawned++;
@@ -76,7 +77,7 @@
           stats.ok++; G.hit(60 + Math.round((cfg.speed - 2) * 8), f.g.position.clone().add(V3(0, 2, 0))); VQ.sfx.play('coin');
           st.tween(f.g.position, { x: bin.x, y: 1.6, z: 3.6 }, 0.35, { ease: 'out' }).then(() => { VQ.fx.burst(st, V3(bin.x, 1.5, 3.6), bin.c.color, 14, 3); st.remove(f.g); });
         } else {
-          stats.wrong++; mistakes.add(f.d.n); G.miss(cfg.lives ? 0 : 12, f.g.position.clone().add(V3(0, 2, 0)));
+          stats.wrong++; mistakes.add(f.d.n); rev.set(f.d.n, [f.d.n + ' → ' + CATS.find((c) => c.id === f.d.c).name, f.d.why]); G.miss(cfg.lives ? 0 : 12, f.g.position.clone().add(V3(0, 2, 0)));
           const cat = CATS.find((c) => c.id === f.d.c);
           VQ.fx.float(st, f.g.position.clone().add(V3(0, 3.6, 1)), `${f.d.n}: ${cat.name}`, '#fca5a5', 0.45);
           G.setTask(`❌ <b>${VQ.esc(f.d.n)}</b> — ${VQ.esc(f.d.why)}`);
@@ -84,7 +85,7 @@
         }
         endCheck();
       }
-      function endCheck() { if (spawned >= cfg.items && !list.length && !G.ended) { const perfect = stats.wrong === 0 && stats.missed === 0; G.end({ completed: true, perfect, bonus: perfect ? 250 : 0, title: perfect ? 'מיון מושלם! 🏭' : 'המשמרת הסתיימה', stats: [['מוינו נכון', stats.ok], ['טעויות', stats.wrong], ['התפספסו', stats.missed]], note: mistakes.size ? 'כדאי לחזור על: ' + [...mistakes].join(', ') : 'שליטה מלאה במכשירים!' }); } }
+      function endCheck() { if (spawned >= cfg.items && !list.length && !G.ended) { const perfect = stats.wrong === 0 && stats.missed === 0; G.end({ completed: true, perfect, bonus: perfect ? 250 : 0, title: perfect ? 'מיון מושלם! 🏭' : 'המשמרת הסתיימה', stats: [['מוינו נכון', stats.ok], ['טעויות', stats.wrong], ['התפספסו', stats.missed]], note: mistakes.size ? '' : 'שליטה מלאה במכשירים!', review: [...rev.values()] }); } }
       G.ctl = {
         onKey(e) { const i = { ArrowLeft: 0, ArrowDown: 1, ArrowRight: 2, Digit1: 0, Digit2: 1, Digit3: 2, Numpad1: 0, Numpad2: 1, Numpad3: 2, KeyA: 0, KeyS: 1, KeyD: 2 }[e.code]; if (i != null) { e.preventDefault(); sort(CATS[i].id); } },
         start() { G.setMid('מכשירים', `0/${cfg.items}`); G.setTask('שלחו את המכשיר הקרוב לפח הנכון'); },

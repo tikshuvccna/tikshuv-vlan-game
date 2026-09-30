@@ -98,6 +98,7 @@
 
   VQ.game({
     id: 'commander', chapter: 'config', title: 'מפקד הקונפיגורציה',
+    concept: 'הגדרת VLAN, Access, Trunk, Native, Allowed, Sub-interface ושמירה ב-Cisco IOS',
     tagline: 'סימולטור Cisco אמיתי! הגדירו VLAN-ים, פורטים, Trunk ונתב — ובדקו שהכול עובד. כל פקודה משנה את המודל התלת־ממדי.',
     howto: [
       '**מתחילים:** מודרך — הפקודה הבאה מוצעת כ"צ׳יפ" מתחת לטרמינל. לחצו עליו (או הקלידו), ואז Enter.',
