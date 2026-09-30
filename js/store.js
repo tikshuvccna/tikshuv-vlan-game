@@ -32,7 +32,8 @@
   S.lessonDone = (ch) => !!S.data.lessons[ch];
   S.medals = (ch) => VQ.LEVELS.map((l) => S.game(ch, l.id).stars > 0);
   S.chapterStars = (ch) => VQ.LEVELS.reduce((a, l) => a + S.game(ch, l.id).stars, 0);
-  S.chapterDone = (ch) => S.lessonDone(ch) && S.game(ch, 'easy').stars > 0;
+  S.gameDone = (ch) => VQ.LEVELS.some((l) => S.game(ch, l.id).stars > 0);   // any level counts
+  S.chapterDone = (ch) => S.lessonDone(ch) && S.gameDone(ch);
   S.unlocked = function (idx) {
     if (VQ.QS.unlockAll) return true;
     return idx === 0 || S.chapterDone(VQ.CHAPTERS[idx - 1].id);

@@ -7,7 +7,7 @@
     howto: [
       '**לחצו/הקישו על חבילות אדומות** כדי להשמיד אותן. חבילה "שורש" (גדולה) שיוצאת ממחשב היא הכי חשובה — אם תפילו אותה לפני שהיא מגיעה למתג, היא לא תתרבה!',
       'כל חבילה שמגיעה למחשב מעמיסה עליו (פס ה-CPU). מחשב ב-100% קורס ואתם מאבדים חיים.',
-      'אספו את **⚡ VLAN** שצף על הרצפה: הוא מחלק את הרשת ל-3 קבוצות צבעוניות, וההתרבות קטנה פי 3!',
+      'אספו את **⚡ VLAN** שצף על הרצפה: הוא מחלק את הרשת ל-3 קבוצות צבעוניות. ה-Broadcast **לא נעלם** – אבל המתג מעביר אותו רק לפורטים באותו VLAN, וההעתקים לקבוצות האחרות נחסמים על הגבול (✖). התוצאה: פי 3 פחות חבילות לכל מחשב.',
     ],
     stage: { bg: 0x070c1a, fogNear: 40, fogFar: 100 },
     levels: {
@@ -24,10 +24,13 @@
       const ring = new THREE.Mesh(new THREE.TorusGeometry(8.4, 0.08, 8, 64), M.mat(0x22d3ee, { e: 0x22d3ee, ei: 1 })); ring.rotation.x = Math.PI / 2; ring.position.y = 0; st.add(ring);
       const sw = M.device('switch', { ports: 4, pitch: 0.5 }); sw.scale.set(1.5, 1.5, 1.5); st.add(sw);
       const swLabel = M.label('SWITCH', { size: 0.5, bg: 'rgba(8,13,28,.85)' }); swLabel.position.set(0, 1.5, 0); st.add(swLabel);
-      const zones = []; // coloured floor sectors (VLAN shield)
+      const zones = [], walls = []; // coloured floor sectors + VLAN boundary walls (only while the VLAN split is active)
+      const firstOf = (k) => Math.ceil((k * cfg.n) / 3), bound = (k) => Math.PI / 2 + (firstOf(k) - 0.5) * ((2 * Math.PI) / cfg.n);
       for (let g = 0; g < 3; g++) {
-        const m = new THREE.Mesh(new THREE.CircleGeometry(8.2, 32, (g * 2 * Math.PI) / 3 + Math.PI / 2, (2 * Math.PI) / 3), new THREE.MeshBasicMaterial({ color: VQ.vhex([10, 20, 30][g]), transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
-        m.rotation.x = -Math.PI / 2; m.position.y = 0.03; st.add(m); zones.push(m);
+        const a0 = bound(g), a1 = g === 2 ? bound(3) : bound(g + 1);
+        const m = new THREE.Mesh(new THREE.CircleGeometry(8.2, 32, a0, a1 - a0), new THREE.MeshBasicMaterial({ color: VQ.vhex([10, 20, 30][g]), transparent: true, opacity: 0, side: THREE.DoubleSide, depthWrite: false }));
+        m.rotation.x = Math.PI / 2; m.position.y = 0.03; st.add(m); zones.push(m);
+        const w = M.box(8.2, 1.6, 0.14, 0xfde047, { e: 0xfacc15, ei: 0.9, o: 0.55 }); w.position.set(Math.cos(a0) * 4.1, 0.8, Math.sin(a0) * 4.1); w.rotation.y = -a0; w.scale.y = 0.01; w.visible = false; st.add(w); walls.push(w);
       }
       // PCs on a ring
       const N = cfg.n, pcs = [];
@@ -42,11 +45,12 @@
         pcs.push({ i, obj: pc, pos: pc.position.clone(), cpu: 0, dead: 0, group: g, bar: fill, bg, smoke: null });
       }
       const packets = []; let spawnT = 1.5, shieldT = cfg.shieldEvery * 0.55, shieldActive = 0, pickup = null;
-      const stats = { roots: 0, copies: 0, crashes: 0, shields: 0, missedRoots: 0 };
+      const stats = { roots: 0, copies: 0, crashes: 0, shields: 0, missedRoots: 0, blocked: 0 };
       G.ctl = {};
       function colorPcs(on) {
         pcs.forEach((p) => { const c = on ? VQ.vhex([10, 20, 30][p.group]) : 0x64748b; p.obj.screen.material.color.setHex(c); p.obj.screen.material.emissive.setHex(c); });
-        zones.forEach((z, k) => st.tween(z.material, { opacity: on ? 0.18 : 0 }, 0.5));
+        zones.forEach((z) => st.tween(z.material, { opacity: on ? 0.2 : 0 }, 0.5));
+        walls.forEach((w) => { if (on) w.visible = true; st.tween(w.scale, { y: on ? 1 : 0.01 }, 0.5, { ease: 'back' }).then(() => { if (!on) w.visible = false; }); });
       }
       function mkPacket(from, to, kind, src) {
         const big = kind === 'root';
@@ -77,10 +81,17 @@
         stats.missedRoots++; VQ.fx.ring(st, V3(0, 0.1, 0), 0xff4d4d, 2.2, 0.5);
         pcs.forEach((d) => {
           if (d === p.src) return;
-          if (shieldActive > 0 && d.group !== p.src.group) return;
+          if (shieldActive > 0 && d.group !== p.src.group) { blockedCopy(d); return; }
           const c = mkPacket(V3(0, 0.6, 0), d.pos.clone().add(V3(0, 0.6, 0)), 'copy', p.src); c.dst = d;
         });
         destroy(p);
+      }
+      // with VLANs the copy is still generated, but the switch drops it at the VLAN boundary
+      function blockedCopy(d) {
+        const from = V3(0, 0.6, 0), to = d.pos.clone().multiplyScalar(0.28).setY(0.6);
+        const g = new THREE.Group(); g.add(M.sph(0.22, 0x94a3b8, { e: 0x64748b, ei: 0.5 }, 8)); g.position.copy(from); st.add(g);
+        st.tween(g.position, { x: to.x, y: to.y, z: to.z }, 0.45, { ease: 'out' }).then(() => { VQ.fx.burst(st, to.clone(), 0x94a3b8, 8, 2, 0.12); VQ.fx.float(st, to.clone().add(V3(0, 0.8, 0)), '✖', '#cbd5e1', 0.5); st.remove(g); });
+        stats.blocked++;
       }
       function hitPc(d) {
         if (d.dead > 0) return;
@@ -103,7 +114,7 @@
         pickup = { g, box, life: 9 }; VQ.sfx.play('coin');
         st.pickable(g, () => {
           if (!pickup) return; VQ.sfx.play('level'); st.unpickable(g); st.remove(g); pickup = null; stats.shields++;
-          shieldActive = cfg.shield; colorPcs(true); G.msg('⚡ VLAN פעיל!', '#fde047'); G.setTask('<b>VLAN פעיל:</b> כל Broadcast נשאר בתוך הקבוצה הצבעונית שלו — הרבה פחות חבילות!'); G.addScore(80, g.position.clone(), '#fde047');
+          shieldActive = cfg.shield; colorPcs(true); G.msg('⚡ הרשת חולקה ל-3 VLAN-ים', '#fde047'); VQ.fx.ring(st, V3(0, 0.1, 0), 0xfde047, 9, 0.9); G.addScore(80, g.position.clone(), '#fde047');
         });
       }
       G.ctl.start = function () { G.setMid('זמן', VQ.fmtTime(cfg.dur)); G.setTask('צדו את החבילות האדומות! 🎯'); };
@@ -117,7 +128,7 @@
         // shield pickup timing
         shieldT -= dt; if (shieldT <= 0 && !pickup && shieldActive <= 0) { spawnPickup(); shieldT = cfg.shieldEvery; }
         if (pickup) { pickup.life -= dt; pickup.g.position.y = 0.9 + Math.sin(G.time * 4) * 0.25; pickup.box.rotation.y += dt * 2; if (pickup.life <= 0) { st.unpickable(pickup.g); st.remove(pickup.g); pickup = null; } }
-        if (shieldActive > 0) { shieldActive -= dt; if (shieldActive <= 0) { colorPcs(false); G.setTask('צדו את החבילות האדומות! 🎯'); G.msg('הסערה חוזרת…', '#fca5a5'); } else G.setTask(`<b>⚡ VLAN פעיל</b> עוד ${Math.ceil(shieldActive)} שנ׳`); }
+        if (shieldActive > 0) { shieldActive -= dt; if (shieldActive <= 0) { colorPcs(false); G.setTask('צדו את החבילות האדומות! 🎯'); G.msg('בלי VLAN – שוב הכול מוצף!', '#fca5a5'); } else G.setTask(`<b>⚡ VLAN פעיל (${Math.ceil(shieldActive)})</b> — ה-Broadcast עדיין נשלח, אבל המתג מעביר אותו רק לפורטים באותו VLAN. שאר ההעתקים נחסמים ✖`); }
         // packets
         for (let i = packets.length - 1; i >= 0; i--) {
           const p = packets[i]; if (p.dead) { packets.splice(i, 1); continue; }
@@ -138,7 +149,7 @@
           G.end({
             completed: true, title: G.lives === G.maxLives ? 'הרשת שרדה! 🛡️' : 'שרדתם את הסערה!', bonus: G.lives * 120 + Math.round(avg * 2), perfect: stats.crashes === 0,
             stats: [['שורשים שהושמדו', stats.roots], ['חבילות-בת שהושמדו', stats.copies], ['מחשבים שקרסו', stats.crashes], ['שימוש ב-⚡ VLAN', stats.shields]],
-            note: stats.shields ? 'שימו לב איך עם VLAN הסערה נעצרה בתוך הקבוצה — זה בדיוק מה ש-VLAN עושה לרשת אמיתית.' : 'טיפ: בפעם הבאה נסו לאסוף את ⚡ VLAN ולראות איך הסערה מצטמצמת.',
+            note: stats.shields ? `VLAN לא מבטל Broadcast – הוא מצמצם את ה-Broadcast Domain: ${stats.blocked} העתקים נחסמו על גבולות ה-VLAN ולא הגיעו למחשבים שלא קשורים.` : 'טיפ: בפעם הבאה אספו את ⚡ VLAN וראו איך ההעתקים לקבוצות האחרות נחסמים במתג.',
           });
         }
       };

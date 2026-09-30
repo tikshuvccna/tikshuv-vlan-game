@@ -117,12 +117,12 @@
   soc.certificate = function (fresh) {
     VQ.sfx.play('click');
     if (!S.data.exam.passed) {
-      const ls = S.lessonsCount(), gs = S.medalCount('easy');
+      const ls = S.lessonsCount(), gs = VQ.CHAPTERS.filter((c) => S.gameDone(c.id)).length;
       ui.modal(h('div', { style: { textAlign: 'center', maxWidth: '520px' } }, h('div', { style: { fontSize: '60px' } }, '🔒'), h('h2', {}, 'התעודה עדיין נעולה'),
         h('p', {}, 'כדי לקבל את תעודת ההבנה על VLAN:'),
         h('div', { style: { textAlign: 'right' } },
           h('div', { class: 'rrow' }, h('span', {}, '📘 שיעורים שהושלמו'), h('b', {}, ls + '/9')),
-          h('div', { class: 'rrow' }, h('span', {}, '🥉 משחקים ברמת "מתחילים"'), h('b', {}, gs + '/9')),
+          h('div', { class: 'rrow' }, h('span', {}, '🎮 משחקים שהושלמו (רמה כלשהי)'), h('b', {}, gs + '/9')),
           h('div', { class: 'rrow' }, h('span', {}, '👾 מבחן הסיום'), h('b', {}, S.data.exam.best ? S.data.exam.best + '% (צריך 70%)' : 'עוד לא'))),
         h('div', { class: 'row', style: { justifyContent: 'center', marginTop: '12px' } }, h('button', { class: 'btn ghost', onClick: () => ui.closeModal() }, 'חזרה למסע')))); return;
     }

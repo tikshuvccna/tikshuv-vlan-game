@@ -94,7 +94,7 @@
       ui.modal(h('div', { style: { textAlign: 'center' } },
         h('div', { style: { fontSize: '64px' } }, '🎓'), h('h2', {}, 'השיעור הושלם!'),
         h('p', {}, `סיימתם את "${c.title}". ${first ? 'קיבלתם +200 נקודות!' : ''}`),
-        h('p', { class: 'sub' }, 'עכשיו הזמן לבחון את מה שלמדתם במשחק — התחילו ברמת "מתחילים", גם אם אתם לא גיימרים 😉'),
+        h('p', { class: 'sub' }, 'עכשיו הזמן לבחון את מה שלמדתם במשחק — בחרו רמה שמתאימה לכם — גם "מתחילים" מקדמת אתכם במסע 😉'),
         h('div', { class: 'row', style: { justifyContent: 'center', marginTop: '10px' } },
           h('button', { class: 'btn green', onClick: () => VQ.goHub(c.id) }, '🎮 למשחק של התחנה'),
           h('button', { class: 'btn ghost', onClick: () => go(0) }, '↻ שוב את השיעור'))));

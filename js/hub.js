@@ -87,10 +87,10 @@
       if (hubState.walking || hubState.orbit) return;
       VQ.sfx.play('click');
       if (i === 9) {
-        if (!(S.allChaptersDone() || VQ.QS.unlockAll)) { ui.toast('מבחן הסיום ייפתח אחרי שתסיימו את כל 9 התחנות (שיעור + משחק ברמת מתחילים)', '🔒'); VQ.sfx.play('bad'); return; }
+        if (!(S.allChaptersDone() || VQ.QS.unlockAll)) { ui.toast('מבחן הסיום ייפתח אחרי שתסיימו את כל 9 התחנות (שיעור + משחק באחת הרמות)', '🔒'); VQ.sfx.play('bad'); return; }
         await walkTo(9); VQ.exam.intro(); return;
       }
-      if (!S.unlocked(i)) { VQ.sfx.play('bad'); stage.shake = 0.4; ui.toast('התחנה נעולה 🔒 השלימו קודם את תחנה ' + i + ' (שיעור + משחק ברמת "מתחילים")', '🔒'); return; }
+      if (!S.unlocked(i)) { VQ.sfx.play('bad'); stage.shake = 0.4; ui.toast('התחנה נעולה 🔒 השלימו קודם את תחנה ' + i + ' (שיעור + משחק באחת הרמות)', '🔒'); return; }
       await walkTo(i);
       hero.userData.cheer = 1.2;
       openStationPanel(VQ.CHAPTERS[i]);
@@ -119,7 +119,7 @@
     });
     box.append(grid);
     box.append(h('div', { class: 'row', style: { marginTop: '14px', justifyContent: 'space-between' } },
-      h('span', { class: 'sub' }, 'לא גיימרים? ברמת "מתחילים" מספיק לסיים כדי להמשיך במסע 💙'),
+      h('span', { class: 'sub' }, 'כל רמה שתסיימו מקדמת אתכם במסע — גם "מתחילים" וגם "אגדות" 💙'),
       h('button', { class: 'btn ghost sm', onClick: () => ui.closeModal() }, 'סגירה')));
     ui.modal(box, { closable: false });
   }
