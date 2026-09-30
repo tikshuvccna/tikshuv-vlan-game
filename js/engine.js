@@ -128,7 +128,7 @@
       c.aspect = a;
       // keep the horizontal field of view usable on portrait / narrow screens
       const ref = 1.55;
-      c.fov = a >= ref ? this.baseFov : Math.min(100, (2 * Math.atan(Math.tan((this.baseFov * Math.PI) / 360) * ref / a) * 180) / Math.PI);
+      c.fov = a >= ref || this.opts.noWiden ? this.baseFov : Math.min(100, (2 * Math.atan(Math.tan((this.baseFov * Math.PI) / 360) * ref / a) * 180) / Math.PI);
       const shift = (this.insetBottom - this.insetTop) / 2, sx = -(this.insetLeft || 0) / 2;
       if (shift || sx) c.setViewOffset(w, h, sx, shift, w, h); else c.clearViewOffset();
       c.updateProjectionMatrix();

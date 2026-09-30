@@ -234,7 +234,7 @@
   M.cable = function (a, b, o = {}) {
     const mesh = new THREE.Mesh(new THREE.BufferGeometry(), M.mat2(o.color || 0x94a3b8, { e: o.glow ? (o.color || 0x94a3b8) : undefined, ei: o.glow ? 0.6 : 0, r: 0.4 }));
     mesh.userData.setEnds = function (p, q, sag = o.sag != null ? o.sag : 0.12) {
-      const mid = p.clone().add(q).multiplyScalar(0.5); mid.y -= sag * p.distanceTo(q) * 0.3 + sag;
+      const mid = p.clone().add(q).multiplyScalar(0.5); mid.y -= sag * p.distanceTo(q) * 0.3 + sag; mid.z += o.lat || 0;
       const curve = new THREE.QuadraticBezierCurve3(p.clone(), mid, q.clone());
       mesh.geometry.dispose(); mesh.geometry = new THREE.TubeGeometry(curve, 20, o.r || 0.035, 6, false);
       mesh.userData.curve = curve;

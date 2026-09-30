@@ -17,10 +17,15 @@
   ui.clearHud = function () { ['hud', 'gamehud', 'lesson'].forEach((i) => { ui.layer(i).innerHTML = ''; }); };
   ui.clearAll = function () { ui.clearHud(); ui.closeModal(); };
 
-  ui.toast = function (html, icon) {
+  const tq = []; let tBusy = false;
+  function pump() {
+    if (tBusy || !tq.length) return; tBusy = true;
+    const [html, icon] = tq.shift();
     const t = h('div', { class: 'toast' }, h('span', { class: 'i' }, icon || '✨'), h('div', { html }));
-    ui.layer('toasts').appendChild(t); setTimeout(() => t.remove(), 3700);
-  };
+    const L = ui.layer('toasts'); while (L.children.length > 2) L.firstChild.remove();
+    L.appendChild(t); setTimeout(() => t.remove(), 3700); setTimeout(() => { tBusy = false; pump(); }, tq.length > 2 ? 900 : 1500);
+  }
+  ui.toast = function (html, icon) { tq.push([html, icon]); if (tq.length > 6) tq.shift(); pump(); };
   ui.achToast = function (a) { VQ.sfx.play('level'); ui.toast('<div style="font-size:12px;color:#a5b4fc">הישג חדש!</div>' + VQ.esc(a.name) + '<div style="font-size:12px;color:#c7d2fe;font-weight:400">' + VQ.esc(a.desc) + '</div>', a.icon); };
 
   ui.confirm = function (msg, yes, no) {

@@ -4,14 +4,17 @@
   const POS = [[-16, 5], [-8, 6.5], [0, 5], [8, 6.5], [16, 5], [16, -7], [8, -8.5], [0, -7], [-8, -8.5], [-16, -7]];
   const MODEL = ['hub', 'repeater', 'switch', 'l3', 'ap', 'router', 'firewall', 'pc', 'laptop'];
   let curIdx = 0;
+  const isPortrait = () => window.innerWidth / window.innerHeight < 0.85;
+  const ZIG = Array.from({ length: 10 }, (_, i) => [(i % 2 ? 5.2 : -5.2), 19.3 - i * 4.3]);
 
   function buildHub(opts = {}) {
-    const stage = new VQ.Stage({ bg: 0x070c1a, fogNear: 40, fogFar: 110, parallax: 1 });
+    const portrait = isPortrait();
+    const stage = new VQ.Stage({ bg: 0x070c1a, fogNear: 60, fogFar: 140, parallax: portrait ? 0.3 : 1, fov: portrait ? 58 : 50, noWiden: portrait });
     VQ.engine.setStage(stage);
     M.grid(stage, 120, 0x16305a); M.stars(stage, 600, 95);
-    stage.setCam([0, 25, 21], [0, 0, -1]);
+    stage.setCam(portrait ? [0, 54, 12] : [0, 25, 21], [0, 0, portrait ? 0 : -1]); if (portrait) stage.setInset(70, 175);
     const nodes = [];
-    const pts = POS.map((p) => V3(p[0], 0, p[1]));
+    const pts = (portrait ? ZIG : POS).map((p) => V3(p[0], 0, p[1]));
     // glowing path
     const curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.4);
     const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 200, 0.14, 8, false), M.glowMat(0x22d3ee, 0.55)); tube.position.y = 0.15; stage.add(tube);
@@ -167,7 +170,7 @@
     ui.clearAll();
     const hs = buildHub(); hs.orbit = true;
     const st = hs.stage; let a = 0;
-    st.onUpdate((dt) => { a += dt * 0.08; st.camPos.set(Math.sin(a) * 6, 20, 30); });
+    st.onUpdate((dt) => { a += dt * 0.08; if (isPortrait()) st.camPos.set(Math.sin(a) * 3, 54, 12 + Math.cos(a) * 2); else st.camPos.set(Math.sin(a) * 6, 20, 30); });
     const cont = S.exists();
     let color = S.data.color || VQ.AVATAR_COLORS[0];
     const inp = h('input', { placeholder: 'איך קוראים לך?', maxlength: 18, value: cont ? S.data.name : '' });

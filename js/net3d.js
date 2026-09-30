@@ -159,6 +159,16 @@
       return recv;
     }
 
+    // synchronous flood (no animation) -> Set of receiving host ids
+    floodSet(srcId) {
+      const src = this.nodes[srcId], recv = new Set(), seen = new Set([src.id]); const L0 = src.links[0]; if (!L0) return recv;
+      const walk = (from, L, vlan) => {
+        const to = this.other(L, from);
+        if (to.isSwitch || to.type === 'hub') { if (seen.has(to.id)) return; seen.add(to.id); to.links.forEach((l) => { if (l !== L && this.canOut(to, l, vlan)) walk(to, l, vlan); }); }
+        else recv.add(to.id);
+      };
+      walk(src, L0, this.vlanIn(L0)); return recv;
+    }
     // unicast path finder with VLAN + router awareness. returns [{node, vlan, link}] or null
     findPath(srcId, dstId) {
       const src = this.nodes[srcId]; if (!src || !src.links[0]) return null;
